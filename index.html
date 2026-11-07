@@ -227,7 +227,7 @@
   <div class="wait">
     <div class="clock"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
     <div>
-      <h3>MENUNGGU PEMBAYARAN</h3>
+      <h3 id="pay-status">MENUNGGU PEMBAYARAN</h3>
       <p>Selesaikan pembayaran sebelum waktu habis. Pesanan akan dikonfirmasi setelah kamu mengirimkan bukti bayar.</p>
       <div class="timer"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> BAYAR SEBELUM: <span id="countdown">20:00</span></div>
     </div>
@@ -276,8 +276,12 @@
   <div class="sheet" id="sheet"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
 const WA = "6281912733875";
+/* Backend otomatis Casaku (Vercel). Isi URL Vercel setelah deploy, misal "https://javastore.vercel.app".
+   Kosong = website tetap jalan dengan QRIS statis + konfirmasi manual WA. */
+const BACKEND_URL = "";
 const PRODUCTS = [
   {id:"xreg", name:"X REG", platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/xreg.jpg", start:4000, popular:true,
    desc:"X REG — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
@@ -396,7 +400,7 @@ function createOrder(){
   document.getElementById("inv-dur").textContent = selectedDur;
   document.getElementById("inv-total").textContent = fmt(selectedPrice);
   document.getElementById("paid-btn").onclick = () => {
-    const text = `Halo JAVASTORE, saya sudah bayar.\nInvoice: ${inv}\nNama: ${name}\nProduk: ${currentProduct.name} - ${selectedDur}\nTotal: ${fmt(selectedPrice)}\nMohon konfirmasi ya.`;
+    const text = `Halo JAVASTORE, saya sudah bayar.\nInvoice: ${inv}\nNama: ${name}\nProduk: ${currentProduct.name} - ${selectedDur}\nTotal: ${fmt(selectedPrice)}${window.__txId ? "\nTransaksi: " + window.__txId : ""}\nMohon konfirmasi ya.`;
     window.open("https://wa.me/" + WA + "?text=" + encodeURIComponent(text), "_blank");
   };
   closeModal();
@@ -414,12 +418,62 @@ function createOrder(){
     sec--;
   };
   tick(); countdownInt = setInterval(tick, 1000);
+  initDynamicQR(inv, selectedPrice, name, wa);
+}
+/* --- Pembayaran otomatis Casaku: QRIS dinamis per order + cek status --- */
+let pollInt = null;
+async function initDynamicQR(inv, amount, name, wa){
+  if (pollInt) { clearInterval(pollInt); pollInt = null; }
+  window.__txId = "";
+  if (!BACKEND_URL) return; // belum deploy backend: pakai QRIS statis seperti biasa
+  try {
+    const r = await fetch(BACKEND_URL + "/api/create-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ invoice: inv, product: currentProduct.id, duration: selectedDur, amount, name, wa }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.qr_string || !data.transactionId) throw new Error(data.error || "gagal buat QRIS dinamis");
+    window.__txId = data.transactionId;
+    // Render QR dinamis (nominal sudah + kode unik, jadi tiap order beda)
+    const qr = qrcode(0, "M");
+    qr.addData(data.qr_string);
+    qr.make();
+    document.getElementById("qrframe").innerHTML = qr.createImgTag(5, 8);
+    if (data.totalAmount) document.getElementById("inv-total").textContent = fmt(data.totalAmount);
+    // Poll status tiap 5 detik sampai lunas / expired / batal
+    pollInt = setInterval(async () => {
+      try {
+        const rr = await fetch(BACKEND_URL + "/api/check-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transactionId: data.transactionId }),
+        });
+        const dd = await rr.json().catch(() => ({}));
+        if (dd.status === "paid") {
+          clearInterval(pollInt); pollInt = null;
+          if (countdownInt) clearInterval(countdownInt);
+          const st = document.getElementById("pay-status");
+          st.textContent = "LUNAS — PEMBAYARAN DITERIMA";
+          st.style.color = "#4ade80";
+          document.getElementById("countdown").textContent = "LUNAS";
+          document.getElementById("paid-btn").textContent = "KONFIRMASI VIA WHATSAPP";
+        } else if (dd.status === "expired" || dd.status === "cancel") {
+          clearInterval(pollInt); pollInt = null;
+          document.getElementById("pay-status").textContent = "PEMBAYARAN " + (dd.status === "expired" ? "KEDALUWARSA" : "DIBATALKAN");
+        }
+      } catch (_) { /* polling gagal sekali: coba lagi di interval berikut */ }
+    }, 5000);
+  } catch (e) {
+    console.warn("QRIS dinamis gagal, pakai QRIS statis:", e);
+  }
 }
 function showHome(){
   document.getElementById("paypage").classList.remove("show");
   document.getElementById("home").classList.remove("hidden");
   document.querySelector("footer").classList.remove("hidden");
   if (countdownInt) clearInterval(countdownInt);
+  if (pollInt) { clearInterval(pollInt); pollInt = null; }
   window.scrollTo(0, 0);
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
