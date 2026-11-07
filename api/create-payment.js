@@ -34,10 +34,25 @@ function readJson(req) {
   });
 }
 
+// Anti-spam order: batasi 10x buat QRIS per IP tiap 10 menit.
+// Pengaman dasar — tiap instance serverless punya hitungannya sendiri,
+// jadi rate limiting Cloudflare tetap jadi lapisan utamanya.
+const RATE_LIMIT = { max: 10, windowMs: 10 * 60 * 1000 };
+const hits = new Map();
+function rateLimited(req) {
+  const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown").split(",")[0].trim();
+  const now = Date.now();
+  const list = (hits.get(ip) || []).filter((t) => now - t < RATE_LIMIT.windowMs);
+  list.push(now);
+  hits.set(ip, list);
+  return list.length > RATE_LIMIT.max;
+}
+
 module.exports = async (req, res) => {
   cors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (rateLimited(req)) return res.status(429).json({ error: "Terlalu banyak percobaan, coba lagi beberapa menit lagi" });
 
   try {
     const { invoice, product, duration, amount, name, wa } = await readJson(req);
