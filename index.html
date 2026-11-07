@@ -82,6 +82,12 @@
   .cbody .pr{font-weight:900;font-size:15px}
   @media(min-width:900px){.cbody .pr{font-size:17px}}
   .buy{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;background:linear-gradient(180deg,#4a90ff,#1e63e8);color:#fff;font-weight:800;padding:10px;border-radius:11px;font-size:14px}
+  .maint-badge{position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:999px}
+  .card.maint{opacity:.85}
+  .buy.maint{background:#3a3f5c;color:#cbd5e1;cursor:not-allowed}
+  .err{display:none;color:#f87171;font-size:12px;font-weight:700;margin-top:6px}
+  .err.show{display:block}
+  input.invalid{border-color:#ef4444 !important}
   .empty{display:none;text-align:center;color:var(--mut);padding:36px 0}
   /* Features */
   .features{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:28px 0}
@@ -282,19 +288,25 @@ const WA = "6281912733875";
 /* Backend otomatis Casaku (Vercel). Isi URL Vercel setelah deploy, misal "https://javastore.vercel.app".
    Kosong = website tetap jalan dengan QRIS statis + konfirmasi manual WA. */
 const BACKEND_URL = "https://javastore-two.vercel.app";
+/* MAINTENANCE: ubah maintenance:true pada produk yang lagi maintenance —
+   kartu produk menampilkan badge MAINTENANCE, tombol Beli nonaktif,
+   dan pembeli tidak bisa checkout. Ubah lagi ke false kalau sudah normal. */
 const PRODUCTS = [
-  {id:"xreg", name:"X REG", platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/xreg.jpg", start:4000, popular:true,
+  {id:"xreg", name:"X REG", maintenance:false, platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/xreg.jpg", start:4000, popular:true,
    desc:"X REG — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
    prices:[["1 JAM",4000],["3 JAM",6000],["6 JAM",10000],["12 JAM",13000],["1 HARI",20000],["3 HARI",30000],["7 HARI",40000],["30 HARI",100000]]},
-  {id:"phantom", name:"PHANTOM", platforms:["android","ios","pc"], platLabel:"ANDROID + IOS + PC", img:"images/phantom.jpg", start:4000, popular:true,
+  {id:"phantom", name:"PHANTOM", maintenance:false, platforms:["android","ios","pc"], platLabel:"ANDROID + IOS + PC", img:"images/phantom.jpg", start:4000, popular:true,
    desc:"PHANTOM Free Fire — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
    prices:[["1 JAM",4000],["3 JAM",6000],["6 JAM",10000],["12 JAM",12000],["1 HARI",18000],["3 HARI",25000],["7 HARI",40000],["30 HARI",80000]]},
-  {id:"ch3atgpt", name:"CH3AT GPT ROOT", platforms:["android"], platLabel:"ANDROID", img:"", start:14000, popular:true,
+  {id:"ch3atgpt", name:"CH3AT GPT ROOT", maintenance:false, platforms:["android"], platLabel:"ANDROID", img:"", start:14000, popular:true,
    desc:"CH3AT GPT ROOT — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
    prices:[["1 HARI",14000],["3 HARI",36000],["7 HARI",70000],["10 HARI",80000],["30 HARI",200000]]},
-  {id:"drip", name:"DRIP CLIENT", platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/drip.jpg", start:6000, popular:false,
-   desc:"DRIP CLIENT (DRIP WIRE) — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
+  {id:"drip", name:"DRIP WIRE", maintenance:false, platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/drip.jpg", start:6000, popular:false,
+   desc:"DRIP WIRE — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
    prices:[["1 HARI",6000],["3 HARI",15000],["7 HARI",25000],["15 HARI",45000],["30 HARI",60000]]},
+  {id:"dripclient", name:"DRIP CLIENT", maintenance:false, platforms:["android"], platLabel:"ANDROID", img:"images/dripclient.jpg", start:10000, popular:true,
+   desc:"DRIP CLIENT — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
+   prices:[["1 HARI",10000],["3 HARI",20000],["7 HARI",45000],["15 HARI",70000],["30 HARI",80000]]},
 ];
 const fmt = n => "Rp " + n.toLocaleString("id-ID");
 let activeFilter = "all";
@@ -327,16 +339,20 @@ function goSlide(i){
 setInterval(() => goSlide((slideIdx + 1) % slides.length), 5000);
 
 function cardHTML(p){
+  const badge = p.maintenance ? '<span class="maint-badge">MAINTENANCE</span>' : '';
   const thumb = p.img
-    ? `<div class="thumb"><img src="${p.img}" alt="${p.name}" loading="lazy"><span class="plat">${p.platLabel}</span></div>`
-    : `<div class="thumb ph-white"><span class="plat" style="color:#fff;background:#111">ANDROID</span><div class="big">CH3AT<br>GPT</div><div class="sub">ROOT</div></div>`;
-  return `<article class="card" onclick="openCheckout('${p.id}')">
+    ? `<div class="thumb"><img src="${p.img}" alt="${p.name}" loading="lazy"><span class="plat">${p.platLabel}</span>${badge}</div>`
+    : `<div class="thumb ph-white"><span class="plat" style="color:#fff;background:#111">ANDROID</span>${badge}<div class="big">CH3AT<br>GPT</div><div class="sub">ROOT</div></div>`;
+  const buyBtn = p.maintenance
+    ? '<span class="buy maint">Maintenance</span>'
+    : `<span class="buy"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21.5 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg> Beli</span>`;
+  return `<article class="card${p.maintenance ? " maint" : ""}" onclick="openCheckout('${p.id}')">
     ${thumb}
     <div class="cbody">
       <h3>${p.name}</h3>
       <div class="from">MULAI DARI</div>
       <div class="pr">${fmt(p.start)}</div>
-      <span class="buy"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21.5 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg> Beli</span>
+      ${buyBtn}
     </div>
   </article>`;
 }
@@ -355,6 +371,15 @@ function setFilter(btn, f){
 }
 function openCheckout(id){
   const p = PRODUCTS.find(x => x.id === id);
+  if (p.maintenance) {
+    document.getElementById("sheet").innerHTML = `
+    <h2>${p.name}</h2>
+    <p class="desc">Produk ini sedang maintenance. Pembelian ditutup sementara — coba lagi nanti ya.</p>
+    <button class="ghost" onclick="closeModal()">Tutup</button>`;
+    document.getElementById("modal").classList.add("open");
+    document.body.style.overflow = "hidden";
+    return;
+  }
   currentProduct = p; selectedDur = p.prices[0][0]; selectedPrice = p.prices[0][1];
   const media = p.img
     ? `<img class="hero-img" src="${p.img}" alt="${p.name}">`
@@ -368,7 +393,8 @@ function openCheckout(id){
     <label>Nama User</label>
     <input id="ord-name" placeholder="Contoh: Javas" autocomplete="name">
     <label>Nomor WhatsApp</label>
-    <input id="ord-wa" placeholder="Contoh: 081912733875" inputmode="tel" autocomplete="tel">
+    <input id="ord-wa" placeholder="Contoh: 081912733875" inputmode="tel" autocomplete="tel" oninput="this.classList.remove('invalid');document.getElementById('wa-err').classList.remove('show')">
+    <div id="wa-err" class="err">Wajib di isi</div>
     <button class="primary" onclick="createOrder()">BUAT PESANAN — <span id="ord-total">${fmt(selectedPrice)}</span></button>
     <button class="ghost" onclick="closeModal()">Batal</button>`;
   document.getElementById("modal").classList.add("open");
@@ -385,10 +411,16 @@ function closeModal(){
   document.body.style.overflow = "";
 }
 function createOrder(){
+  if (currentProduct && currentProduct.maintenance) { alert("Produk ini sedang maintenance, belum bisa dibeli."); return; }
   const name = (document.getElementById("ord-name").value || "").trim();
   const wa = (document.getElementById("ord-wa").value || "").trim();
   if (!name) { alert("Isi Nama User dulu ya."); return; }
-  if (!wa) { alert("Isi nomor WhatsApp dulu ya."); return; }
+  const waInput = document.getElementById("ord-wa");
+  const waErr = document.getElementById("wa-err");
+  const waDigits = wa.replace(/[\s\-\.]/g, "");
+  const waValid = /^(?:\+?62|0)8\d{7,12}$/.test(waDigits);
+  if (!wa) { waErr.textContent = "Wajib di isi"; waErr.classList.add("show"); waInput.classList.add("invalid"); waInput.focus(); return; }
+  if (!waValid) { waErr.textContent = "Nomor WhatsApp tidak valid, contoh: 081912733875"; waErr.classList.add("show"); waInput.classList.add("invalid"); waInput.focus(); return; }
   const d = new Date();
   const ymd = d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
   const code = Math.random().toString(36).slice(2,7).toUpperCase();

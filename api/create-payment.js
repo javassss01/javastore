@@ -9,9 +9,15 @@ const PRICES = {
   phantom: [4000, 6000, 10000, 12000, 18000, 25000, 40000, 80000],
   ch3atgpt: [14000, 36000, 70000, 80000, 200000],
   drip: [6000, 15000, 25000, 45000, 60000],
+  dripclient: [10000, 20000, 45000, 70000, 80000],
 };
 
 const CASAKU_API = "https://api.casaku.id";
+
+// MAINTENANCE: isi id produk yang lagi maintenance, misal new Set(["xreg"]) —
+// request untuk produk itu ditolak supaya tidak bisa beli lewat API langsung.
+// Samakan dengan maintenance:true di index.html.
+const MAINTENANCE = new Set([]);
 
 const ALLOWED_ORIGINS = ["https://javassss01.github.io", "https://javascheat.my.id", "https://www.javascheat.my.id"];
 
@@ -61,6 +67,9 @@ module.exports = async (req, res) => {
     const allowed = PRICES[product];
     if (!allowed || !allowed.includes(Number(amount))) {
       return res.status(400).json({ error: "Produk atau nominal tidak valid" });
+    }
+    if (MAINTENANCE.has(product)) {
+      return res.status(503).json({ error: "Produk sedang maintenance" });
     }
     if (!invoice || !name || !wa) {
       return res.status(400).json({ error: "Data pesanan tidak lengkap" });
