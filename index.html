@@ -174,7 +174,7 @@
   <div class="wrap"><div class="menu" id="menu">
     <a href="#" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/></svg> Beranda</a>
     <a href="#produk" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21.5 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg> Produk</a>
-    <a href="#cara" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 19.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H19"/></svg> Cara Beli</a>
+    <a href="#cara" onclick="goCara();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 19.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H19"/></svg> Cara Beli</a>
     <a href="https://wa.me/6281912733875?text=Halo%20JAVASTORE%2C%20saya%20mau%20tanya-tanya%20dulu." target="_blank" rel="noopener"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l2-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg> Hubungi Admin (WhatsApp)</a>
   </div></div>
 </header>
@@ -272,7 +272,7 @@
     <p style="margin-top:8px">JAVASTORE adalah platform top-up game terpercaya dan termurah. Dapatkan harga terbaik dan proses instan 24 jam.</p>
     <div class="footcols">
       <div><h4>LAYANAN</h4><a href="#produk" onclick="showHome();return false">Top Up Game</a><a href="#produk" onclick="showHome();return false">Beli Voucher</a><a href="#produk" onclick="showHome();return false">VIP Mods</a></div>
-      <div><h4>DUKUNGAN</h4><a href="#cara" onclick="showHome();return false">Cara Beli</a><a href="https://wa.me/6281912733875" target="_blank" rel="noopener">Hubungi Kami</a><a href="#" onclick="showHome();return false">FAQ</a></div>
+      <div><h4>DUKUNGAN</h4><a href="#cara" onclick="goCara();return false">Cara Beli</a><a href="https://wa.me/6281912733875" target="_blank" rel="noopener">Hubungi Kami</a><a href="#" onclick="showHome();return false">FAQ</a></div>
     </div>
     <p style="margin-top:16px">WhatsApp: <b>0819-1273-3875</b> • Order hanya via website ini.<br>Penggunaan produk mengikuti aturan game masing-masing. Harga dapat berubah sewaktu-waktu.</p>
   </div>
@@ -499,6 +499,10 @@ async function initDynamicQR(inv, amount, name, wa){
   } catch (e) {
     console.warn("QRIS dinamis gagal, pakai QRIS statis:", e);
   }
+}
+function goCara(){
+  showHome();
+  setTimeout(() => document.getElementById("cara").scrollIntoView({behavior:"smooth", block:"start"}), 60);
 }
 function showHome(){
   document.getElementById("paypage").classList.remove("show");
