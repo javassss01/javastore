@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAVASTORE — Top-Up &amp; Game Mod Terpercaya</title>
+<meta name="description" content="JAVASTORE — X REG, PHANTOM, CH3AT GPT, dan DRIP CLIENT. Pilih durasi, klik Beli, order langsung via WhatsApp.">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#05060f;--card:#0d1024;--card2:#12163a;--line:#232850;--txt:#eef0ff;--mut:#9aa3c7;--blue:#2f7bff;--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--wa:#25d366}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+  header{position:sticky;top:0;z-index:20;background:rgba(5,6,15,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+  .logo{font-size:26px;font-weight:900;letter-spacing:.5px}
+  .logo span{color:var(--blue)}
+  .logo small{display:block;font-size:11px;font-weight:600;letter-spacing:3px;color:var(--mut)}
+  .wa-top{background:var(--wa);color:#04160a;font-weight:800;padding:10px 16px;border-radius:999px;font-size:14px;white-space:nowrap}
+  .hero{padding:38px 0 8px;text-align:center}
+  .hero h1{font-size:clamp(28px,6vw,48px);line-height:1.08;font-weight:900}
+  .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--mut);margin:12px auto 0;max-width:640px;line-height:1.6}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+  .badge{border:1px solid var(--line);background:#0a0d20;padding:7px 12px;border-radius:999px;font-size:13px;color:#cdd3f2}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:26px 0 18px}
+  .toolbar input{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);color:var(--txt);padding:12px 14px;border-radius:12px;font-size:15px;outline:none}
+  .toolbar input:focus{border-color:var(--blue)}
+  .chip{border:1px solid var(--line);background:var(--card);color:var(--txt);padding:11px 16px;border-radius:999px;font-size:14px;cursor:pointer}
+  .chip.active{background:var(--blue);border-color:var(--blue);font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding-bottom:10px}
+  .card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s}
+  .card:hover{transform:translateY(-3px);border-color:var(--blue)}
+  .thumb{aspect-ratio:1/1;overflow:hidden;background:#000}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:radial-gradient(circle at 50% 30%,#14532d,#05060f 70%);font-weight:900}
+  .thumb.placeholder .big{font-size:34px;letter-spacing:1px}
+  .thumb.placeholder .sub{font-size:12px;letter-spacing:4px;color:var(--green)}
+  .body{padding:14px 14px 16px}
+  .tag{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--cyan);text-transform:uppercase}
+  .body h2{font-size:20px;margin:6px 0 4px}
+  .price{color:var(--mut);font-size:14px}
+  .price b{color:#fff;font-size:17px}
+  .btn{display:block;text-align:center;margin-top:12px;background:var(--blue);color:#fff;font-weight:800;padding:12px;border-radius:12px}
+  .btn:hover{background:#1f63d6}
+  .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:34px 0}
+  .feat{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:18px}
+  .feat h3{font-size:16px;margin-bottom:6px}
+  .feat p{color:var(--mut);font-size:14px;line-height:1.55}
+  .how{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:20px;margin-bottom:34px}
+  .how h2{font-size:20px;margin-bottom:12px}
+  .how ol{margin-left:20px;color:var(--mut);line-height:1.9}
+  .how ol b{color:#fff}
+  footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--mut);font-size:13px;line-height:1.7}
+  footer b{color:#fff}
+  .empty{display:none;text-align:center;color:var(--mut);padding:40px 0}
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+  .modal.open{display:flex}
+  .sheet{background:#0b0e22;border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:20px}
+  .sheet img{width:100%;border-radius:14px;aspect-ratio:1/1;object-fit:cover}
+  .sheet h2{font-size:24px;margin:14px 0 4px}
+  .sheet .desc{color:var(--mut);font-size:14px;line-height:1.6}
+  .plist{margin-top:16px;display:grid;gap:8px}
+  .prow{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);background:#0f1330;border-radius:12px;padding:11px 12px}
+  .prow .dur{font-weight:700}
+  .prow .pr{color:var(--mut)}
+  .prow .pr b{color:#fff}
+  .prow a{background:var(--wa);color:#04160a;font-weight:800;font-size:13px;padding:9px 12px;border-radius:999px;white-space:nowrap}
+  .close{width:100%;margin-top:14px;background:#1a1f45;color:#fff;border:1px solid var(--line);padding:12px;border-radius:12px;font-weight:700;cursor:pointer}
+  @media(min-width:640px){.modal{align-items:center;padding:20px}.sheet{border-radius:20px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#">JAVA<span>STORE</span><small>TOP-UP &amp; GAME MOD</small></a>
+    <a class="wa-top" href="https://wa.me/6281912733875?text=Halo%20JAVASTORE%2C%20saya%20mau%20tanya-tanya%20dulu." target="_blank" rel="noopener">💬 WhatsApp</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>JAVASTORE — Top 1 VIP Mods<br><em>Terbaik di Indonesia 🚀</em></h1>
+    <p>Koleksi produk pilihan terbaik khusus untuk anda. Pilih produk, pilih durasi, klik Beli — order langsung masuk WhatsApp admin.</p>
+    <div class="badges">
+      <span class="badge">⚡ Proses Cepat</span>
+      <span class="badge">💬 Fast Response</span>
+      <span class="badge">🕐 24/7 Support</span>
+      <span class="badge">✅ Trusted</span>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Cari produk... contoh: X REG, PHANTOM" oninput="filterProducts()">
+    <button class="chip active" data-filter="all" onclick="setFilter(this,'all')">Semua</button>
+    <button class="chip" data-filter="populer" onclick="setFilter(this,'populer')">Produk Populer</button>
+  </div>
+
+  <section class="grid" id="grid"><!-- cards rendered by JS --></section>
+  <p class="empty" id="empty">Produk tidak ditemukan. Coba kata kunci lain.</p>
+
+  <section class="features">
+    <div class="feat"><h3>⚡ Proses Cepat</h3><p>Order via WhatsApp, lisensi dikirim setelah pembayaran dikonfirmasi admin.</p></div>
+    <div class="feat"><h3>💬 24/7 Support</h3><p>Fast response via WhatsApp <b>0819-1273-3875</b>.</p></div>
+    <div class="feat"><h3>✅ Trusted</h3><p>Harga jelas per durasi, tanpa biaya tersembunyi.</p></div>
+    <div class="feat"><h3>🎮 Banyak Pilihan Durasi</h3><p>Dari 1 jam sampai 30 hari, pilih sesuai kebutuhanmu.</p></div>
+  </section>
+
+  <section class="how">
+    <h2>Cara Order</h2>
+    <ol>
+      <li><b>Pilih produk</b> — klik kartu produk untuk lihat semua harga durasi.</li>
+      <li><b>Pilih durasi</b> — klik tombol WA di durasi yang kamu mau, pesan order otomatis terisi.</li>
+      <li><b>Bayar &amp; konfirmasi</b> — ikuti instruksi admin di WhatsApp, lisensi dikirim setelah pembayaran terkonfirmasi.</li>
+    </ol>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <b>JAVASTORE</b> — Top-Up &amp; Game Mod Terpercaya.<br>
+    WhatsApp: <b>0819-1273-3875</b> &nbsp;•&nbsp; Order hanya via WhatsApp resmi di website ini.<br>
+    Penggunaan produk mengikuti aturan game masing-masing. Harga dapat berubah sewaktu-waktu.
+  </div>
+</footer>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+const WA = "6281912733875";
+const PRODUCTS = [
+  {id:"xreg", name:"X REG", tag:"Android • iOS", img:"images/xreg.jpg", start:4000, popular:true,
+   desc:"X REG — lisensi per durasi. Pilih durasi di bawah, klik tombol WA, order langsung terkirim ke admin.",
+   prices:[["1 JAM",4000],["3 JAM",6000],["6 JAM",10000],["12 JAM",13000],["1 HARI",20000],["3 HARI",30000],["7 HARI",40000],["30 HARI",100000]]},
+  {id:"phantom", name:"PHANTOM", tag:"Free Fire • Android • iOS • PC", img:"images/phantom.jpg", start:4000, popular:true,
+   desc:"PHANTOM Free Fire — lisensi per durasi. Pilih durasi di bawah, klik tombol WA, order langsung terkirim ke admin.",
+   prices:[["1 JAM",4000],["3 JAM",6000],["6 JAM",10000],["12 JAM",12000],["1 HARI",18000],["3 HARI",25000],["7 HARI",40000],["30 HARI",80000]]},
+  {id:"ch3atgpt", name:"CH3AT GPT", tag:"Android", img:"", start:14000, popular:true,
+   desc:"CH3AT GPT — lisensi per durasi. Pilih durasi di bawah, klik tombol WA, order langsung terkirim ke admin.",
+   prices:[["1 HARI",14000],["3 HARI",36000],["7 HARI",70000],["10 HARI",80000],["30 HARI",200000]]},
+  {id:"drip", name:"DRIP CLIENT", tag:"Android • iOS", img:"images/drip.jpg", start:6000, popular:false,
+   desc:"DRIP CLIENT (DRIP WIRE) — lisensi per durasi. Pilih durasi di bawah, klik tombol WA, order langsung terkirim ke admin.",
+   prices:[["1 HARI",6000],["3 HARI",15000],["7 HARI",25000],["15 HARI",45000],["30 HARI",60000]]},
+];
+const fmt = n => "Rp " + n.toLocaleString("id-ID");
+let activeFilter = "all";
+
+function waLink(product, dur, price){
+  const text = `Halo JAVASTORE, saya mau beli ${product} - ${dur} (${fmt(price)}).`;
+  return "https://wa.me/" + WA + "?text=" + encodeURIComponent(text);
+}
+function cardHTML(p){
+  const thumb = p.img
+    ? `<div class="thumb"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>`
+    : `<div class="thumb placeholder"><div class="big">CH3AT<br>GPT</div><div class="sub">JAVASTORE</div></div>`;
+  return `<article class="card" onclick="openModal('${p.id}')">
+    ${thumb}
+    <div class="body">
+      <div class="tag">${p.tag}</div>
+      <h2>${p.name}</h2>
+      <div class="price">Mulai dari <b>${fmt(p.start)}</b></div>
+      <span class="btn">Beli</span>
+    </div>
+  </article>`;
+}
+function render(){
+  const q = (document.getElementById("search").value || "").toLowerCase().trim();
+  let list = PRODUCTS.filter(p => (!q || p.name.toLowerCase().includes(q)));
+  if(activeFilter === "populer") list = list.filter(p => p.popular);
+  document.getElementById("grid").innerHTML = list.map(cardHTML).join("");
+  document.getElementById("empty").style.display = list.length ? "none" : "block";
+}
+function filterProducts(){ render(); }
+function setFilter(btn, f){
+  activeFilter = f;
+  document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+}
+function openModal(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  const media = p.img
+    ? `<img src="${p.img}" alt="${p.name}">`
+    : `<div class="thumb placeholder" style="border-radius:14px"><div class="big">CH3AT<br>GPT</div><div class="sub">JAVASTORE</div></div>`;
+  document.getElementById("sheet").innerHTML = `
+    ${media}
+    <h2>${p.name}</h2>
+    <p class="desc">${p.desc}</p>
+    <div class="plist">
+      ${p.prices.map(([d,pr]) => `<div class="prow"><div><div class="dur">${d}</div><div class="pr"><b>${fmt(pr)}</b></div></div><a href="${waLink(p.name,d,pr)}" target="_blank" rel="noopener">Beli via WA</a></div>`).join("")}
+    </div>
+    <button class="close" onclick="closeModal()">Tutup</button>`;
+  document.getElementById("modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeModal(){
+  document.getElementById("modal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+render();
+</script>
+</body>
+</html>
