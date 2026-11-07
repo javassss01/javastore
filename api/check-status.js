@@ -2,8 +2,12 @@
 // Env: CASAKU_LICENSE_KEY (diisi di dashboard Vercel)
 const CASAKU_API = "https://api.casaku.id";
 
-function cors(res) {
-  res.setHeader("Access-Control-Allow-Origin", "https://javassss01.github.io");
+const ALLOWED_ORIGINS = ["https://javassss01.github.io", "https://javascheat.my.id", "https://www.javascheat.my.id"];
+
+function cors(req, res) {
+  if (ALLOWED_ORIGINS.includes(req.headers.origin)) {
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
@@ -20,7 +24,7 @@ function readJson(req) {
 }
 
 module.exports = async (req, res) => {
-  cors(res);
+  cors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
