@@ -83,10 +83,11 @@
   .cbody .stock{color:#4ade80;font-size:12px;font-weight:800;margin-top:3px}
   .dur em.st{display:block;color:#4ade80;font-style:normal;font-size:11px;font-weight:800}
   @media(min-width:900px){.cbody .pr{font-size:17px}}
-  .buy{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;background:linear-gradient(180deg,#4a90ff,#1e63e8);color:#fff;font-weight:800;padding:10px;border-radius:11px;font-size:14px}
+  .buy{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;background:linear-gradient(180deg,#4a90ff,#1e63e8);color:#fff;font-weight:800;padding:10px;border-radius:11px;font-size:14px;animation:buyBlink 1.6s ease-in-out infinite}
+  @keyframes buyBlink{0%,100%{box-shadow:0 0 0 0 rgba(74,144,255,.45);filter:brightness(1)}50%{box-shadow:0 0 18px 4px rgba(74,144,255,.8);filter:brightness(1.15)}}
   .maint-badge{position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:999px}
   .card.maint{opacity:.85}
-  .buy.maint{background:#3a3f5c;color:#cbd5e1;cursor:not-allowed}
+  .buy.maint{background:#3a3f5c;color:#cbd5e1;cursor:not-allowed;animation:none}
   .err{display:none;color:#f87171;font-size:12px;font-weight:700;margin-top:6px}
   .err.show{display:block}
   input.invalid{border-color:#ef4444 !important}
