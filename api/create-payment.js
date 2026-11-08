@@ -5,7 +5,7 @@
 //   CASAKU_WEBHOOK_SECRET — Webhook Secret dari casaku.id/api-keys (untuk api/webhook.js)
 // Harga resmi JAVASTORE — dipakai untuk validasi nominal supaya tidak bisa diubah dari browser.
 const PRICES = {
-  xreg: [4000, 6000, 10000, 13000, 20000, 30000, 40000, 100000],
+  xreg: [5000, 8000, 12000, 15000, 20000, 40000, 70000, 130000],
   phantom: [4000, 6000, 10000, 12000, 18000, 25000, 40000, 80000],
   ch3atgpt: [14000, 36000, 70000, 80000, 200000],
   drip: [4000, 6000, 10000, 15000, 50000, 130000],
