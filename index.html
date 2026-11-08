@@ -67,7 +67,7 @@
   .sect p{color:var(--mut);font-size:13px;margin-top:3px}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
   @media(min-width:900px){.grid{grid-template-columns:repeat(4,1fr);gap:14px}}
-  .card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s}
+  .card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s;display:flex;flex-direction:column}
   .card:hover{transform:translateY(-3px);border-color:var(--blue)}
   .thumb{aspect-ratio:1/1;overflow:hidden;background:#000;position:relative}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -75,15 +75,15 @@
   .thumb.ph-white{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#111}
   .thumb.ph-white .big{font-size:22px;font-weight:900;text-align:center;line-height:1.1}
   .thumb.ph-white .sub{font-size:11px;letter-spacing:3px;color:#666}
-  .cbody{padding:10px}
+  .cbody{padding:10px;display:flex;flex-direction:column;flex:1}
   .cbody h3{font-size:14px}
   @media(min-width:900px){.cbody h3{font-size:17px}}
   .cbody .from{color:var(--mut);font-size:11px;margin-top:4px}
   .cbody .pr{font-weight:900;font-size:15px}
-  .cbody .stock{color:#4ade80;font-size:12px;font-weight:800;margin-top:3px}
+  .cbody .stock{color:#4ade80;font-size:12px;font-weight:800;margin-top:3px;margin-bottom:9px}
   .dur em.st{display:block;color:#4ade80;font-style:normal;font-size:11px;font-weight:800}
   @media(min-width:900px){.cbody .pr{font-size:17px}}
-  .buy{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;background:linear-gradient(180deg,#4a90ff,#1e63e8);color:#fff;font-weight:800;padding:10px;border-radius:11px;font-size:14px;animation:buyBlink 1.6s ease-in-out infinite}
+  .buy{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:auto;background:linear-gradient(180deg,#4a90ff,#1e63e8);color:#fff;font-weight:800;padding:10px;border-radius:11px;font-size:14px;animation:buyBlink 1.6s ease-in-out infinite}
   @keyframes buyBlink{0%,100%{box-shadow:0 0 0 0 rgba(74,144,255,.45);filter:brightness(1)}50%{box-shadow:0 0 18px 4px rgba(74,144,255,.8);filter:brightness(1.15)}}
   .maint-badge{position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:999px}
   .card.maint{opacity:.85}
