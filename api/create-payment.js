@@ -148,7 +148,7 @@ module.exports = async (req, res) => {
       product,
       duration,
       hasStock,
-      expiresAt: d.expiredAt || d.expired_at || null,
+      expiresAt: d.expiredAt || d.expired_at || new Date(Date.now() + 20 * 60 * 1000).toISOString(),
     });
   } catch (e) {
     return res.status(500).json({ error: "Gagal membuat pembayaran", detail: String(e && e.message || e) });

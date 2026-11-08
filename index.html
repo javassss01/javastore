@@ -461,20 +461,116 @@ function createOrder(){
   document.querySelector("footer").classList.add("hidden");
   document.getElementById("paypage").classList.add("show");
   window.scrollTo(0, 0);
-  let sec = 20 * 60;
-  if (countdownInt) clearInterval(countdownInt);
-  const tick = () => {
-    const m = String(Math.floor(sec / 60)).padStart(2, "0");
-    const s = String(sec % 60).padStart(2, "0");
-    document.getElementById("countdown").textContent = `${m}:${s}`;
-    if (sec <= 0) { clearInterval(countdownInt); document.getElementById("countdown").textContent = "WAKTU HABIS"; return; }
-    sec--;
-  };
-  tick(); countdownInt = setInterval(tick, 1000);
+  // Countdown real-time: dihitung dari deadline (jam asli), bukan dari
+  // penghitung yang dikurangi tiap detik — jadi tetap akurat walau tab
+  // di-background, dan tetap jalan walau web ditutup lalu dibuka lagi.
+  window.__deadline = Date.now() + 20 * 60 * 1000;
+  startCountdown();
   initDynamicQR(inv, selectedPrice, name, wa);
 }
 /* --- Pembayaran otomatis Casaku: QRIS dinamis per order + cek status --- */
 let pollInt = null;
+function renderQR(qrString){
+  const qr = qrcode(0, "M");
+  qr.addData(qrString);
+  qr.make();
+  document.getElementById("qrframe").innerHTML = qr.createImgTag(5, 8);
+}
+// Countdown real-time dari deadline (jam asli). Tiap detik dihitung ulang
+// dari jam, jadi tidak melambat saat tab di-background dan tidak reset saat reload.
+function startCountdown(){
+  if (countdownInt) clearInterval(countdownInt);
+  const tick = () => {
+    const rem = Math.max(0, (window.__deadline || 0) - Date.now());
+    const m = String(Math.floor(rem / 60000)).padStart(2, "0");
+    const s = String(Math.floor((rem % 60000) / 1000)).padStart(2, "0");
+    document.getElementById("countdown").textContent = rem > 0 ? `${m}:${s}` : "WAKTU HABIS";
+    if (rem <= 0) clearInterval(countdownInt);
+  };
+  tick();
+  countdownInt = setInterval(tick, 1000);
+}
+function clearStoredOrder(){ try { localStorage.removeItem("javastore_order"); } catch (_) {} }
+// Poll status tiap 5 detik sampai lunas / expired / batal.
+function startPolling(transactionId){
+  if (pollInt) { clearInterval(pollInt); pollInt = null; }
+  pollInt = setInterval(async () => {
+    try {
+      const rr = await fetch(BACKEND_URL + "/api/check-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactionId }),
+      });
+      const dd = await rr.json().catch(() => ({}));
+      if (dd.status === "paid") {
+        clearInterval(pollInt); pollInt = null;
+        if (countdownInt) clearInterval(countdownInt);
+        const st = document.getElementById("pay-status");
+        st.textContent = "LUNAS — PEMBAYARAN DITERIMA";
+        st.style.color = "#4ade80";
+        document.getElementById("countdown").textContent = "LUNAS";
+        clearStoredOrder();
+        // Ambil key otomatis (coba beberapa kali — webhook butuh sedetik untuk klaim key).
+        let kd = {};
+        for (let attempt = 0; attempt < 4; attempt++) {
+          try {
+            const kr = await fetch(BACKEND_URL + "/api/get-key", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ transactionId }),
+            });
+            kd = await kr.json().catch(() => ({}));
+            if (kd.license_code) break;
+          } catch (_) { /* coba lagi */ }
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        if (kd.license_code) {
+          document.getElementById("keycode").textContent = kd.license_code;
+          document.getElementById("keybox").style.display = "";
+          document.getElementById("pending-note").style.display = "none";
+        } else {
+          // Lunas tapi tidak ada key (stok habis / produk belum ada stok):
+          // tampilkan link hubungi admin.
+          document.getElementById("pending-note").style.display = "none";
+          document.getElementById("wa-fallback").style.display = "";
+        }
+      } else if (dd.status === "expired" || dd.status === "cancel") {
+        clearInterval(pollInt); pollInt = null;
+        document.getElementById("pay-status").textContent = "PEMBAYARAN " + (dd.status === "expired" ? "KEDALUWARSA" : "DIBATALKAN");
+        document.getElementById("pending-note").style.display = "none";
+        clearStoredOrder();
+      }
+    } catch (_) { /* polling gagal sekali: coba lagi di interval berikut */ }
+  }, 5000);
+}
+// Kalau ada order yang belum selesai saat halaman dibuka lagi (web sempat
+// ditutup), pulihkan halaman pembayaran dengan sisa waktu yang benar.
+function restoreOrder(){
+  let o = null;
+  try { o = JSON.parse(localStorage.getItem("javastore_order") || "null"); } catch (_) {}
+  if (!o || !o.transactionId || !o.expiresAt) return;
+  if (new Date(o.expiresAt).getTime() <= Date.now()) { clearStoredOrder(); return; }
+  document.getElementById("inv-id").textContent = o.invoice;
+  document.getElementById("inv-name").textContent = o.name;
+  document.getElementById("inv-wa").textContent = o.wa;
+  document.getElementById("inv-product").textContent = o.productName;
+  document.getElementById("inv-dur").textContent = o.duration;
+  document.getElementById("inv-total").textContent = fmt(o.total);
+  document.getElementById("keybox").style.display = "none";
+  document.getElementById("keycode").textContent = "";
+  document.getElementById("pending-note").style.display = "";
+  document.getElementById("wa-fallback").style.display = "none";
+  document.getElementById("wa-fallback").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(`Halo JAVASTORE, saya sudah bayar tapi key belum muncul.\nInvoice: ${o.invoice}\nNama: ${o.name}\nProduk: ${o.productName} - ${o.duration}\nTotal: ${fmt(o.total)}\nMohon bantuannya ya.`);
+  renderQR(o.qr_string);
+  window.__txId = o.transactionId;
+  window.__deadline = new Date(o.expiresAt).getTime();
+  document.getElementById("home").classList.add("hidden");
+  document.querySelector("footer").classList.add("hidden");
+  document.getElementById("paypage").classList.add("show");
+  window.scrollTo(0, 0);
+  startCountdown();
+  startPolling(o.transactionId);
+}
 async function initDynamicQR(inv, amount, name, wa){
   if (pollInt) { clearInterval(pollInt); pollInt = null; }
   window.__txId = "";
@@ -488,60 +584,21 @@ async function initDynamicQR(inv, amount, name, wa){
     const data = await r.json().catch(() => ({}));
     if (!r.ok || !data.qr_string || !data.transactionId) throw new Error(data.error || "gagal buat QRIS dinamis");
     window.__txId = data.transactionId;
-    // Render QR dinamis (nominal sudah + kode unik, jadi tiap order beda)
-    const qr = qrcode(0, "M");
-    qr.addData(data.qr_string);
-    qr.make();
-    document.getElementById("qrframe").innerHTML = qr.createImgTag(5, 8);
+    renderQR(data.qr_string);
     if (data.totalAmount) document.getElementById("inv-total").textContent = fmt(data.totalAmount);
-    // Poll status tiap 5 detik sampai lunas / expired / batal
-    pollInt = setInterval(async () => {
-      try {
-        const rr = await fetch(BACKEND_URL + "/api/check-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transactionId: data.transactionId }),
-        });
-        const dd = await rr.json().catch(() => ({}));
-        if (dd.status === "paid") {
-          clearInterval(pollInt); pollInt = null;
-          if (countdownInt) clearInterval(countdownInt);
-          const st = document.getElementById("pay-status");
-          st.textContent = "LUNAS — PEMBAYARAN DITERIMA";
-          st.style.color = "#4ade80";
-          document.getElementById("countdown").textContent = "LUNAS";
-          // Ambil key otomatis (coba beberapa kali — webhook butuh sedetik untuk klaim key).
-          // Kalau tidak ada key, tampilkan lagi tombol konfirmasi manual via WA.
-          let kd = {};
-          for (let attempt = 0; attempt < 4; attempt++) {
-            try {
-              const kr = await fetch(BACKEND_URL + "/api/get-key", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ transactionId: data.transactionId }),
-              });
-              kd = await kr.json().catch(() => ({}));
-              if (kd.license_code) break;
-            } catch (_) { /* coba lagi */ }
-            await new Promise(r => setTimeout(r, 2000));
-          }
-          if (kd.license_code) {
-            document.getElementById("keycode").textContent = kd.license_code;
-            document.getElementById("keybox").style.display = "";
-            document.getElementById("pending-note").style.display = "none";
-          } else {
-            // Lunas tapi tidak ada key (stok habis / produk belum ada stok):
-            // tampilkan link hubungi admin.
-            document.getElementById("pending-note").style.display = "none";
-            document.getElementById("wa-fallback").style.display = "";
-          }
-        } else if (dd.status === "expired" || dd.status === "cancel") {
-          clearInterval(pollInt); pollInt = null;
-          document.getElementById("pay-status").textContent = "PEMBAYARAN " + (dd.status === "expired" ? "KEDALUWARSA" : "DIBATALKAN");
-          document.getElementById("pending-note").style.display = "none";
-        }
-      } catch (_) { /* polling gagal sekali: coba lagi di interval berikut */ }
-    }, 5000);
+    // Samakan deadline dengan server (Casaku: 20 menit sejak QR dibuat).
+    if (data.expiresAt) window.__deadline = new Date(data.expiresAt).getTime();
+    // Simpan order supaya bisa dilanjutkan kalau web ditutup lalu dibuka lagi.
+    try {
+      localStorage.setItem("javastore_order", JSON.stringify({
+        invoice: data.invoice, name, wa,
+        product: currentProduct.id, productName: currentProduct.name,
+        duration: selectedDur, total: data.totalAmount,
+        transactionId: data.transactionId, qr_string: data.qr_string,
+        expiresAt: new Date(window.__deadline).toISOString(),
+      }));
+    } catch (_) {}
+    startPolling(data.transactionId);
   } catch (e) {
     console.warn("QRIS dinamis gagal, pakai QRIS statis:", e);
   }
@@ -560,6 +617,7 @@ function showHome(){
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 render();
+restoreOrder();
 </script>
 </body>
 </html>
