@@ -36,10 +36,11 @@
   .menu a:hover{background:#12204a}
   /* Banner carousel */
   .carousel{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);margin-top:14px;min-height:190px}
-  .slide{position:absolute;inset:0;display:none;align-items:flex-end;padding:20px;background-size:cover;background-position:center}
-  .slide.active{display:flex}
+  .slide{position:absolute;inset:0;display:flex;align-items:flex-end;padding:20px;background-size:cover;background-position:center;opacity:0;visibility:hidden;transition:opacity .6s ease,visibility .6s;pointer-events:none}
+  .slide.active{opacity:1;visibility:visible;pointer-events:auto}
   .slide::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,8,26,.05) 40%,rgba(4,8,26,.92))}
-  .slide .txt{position:relative;z-index:2}
+  .slide .txt{position:relative;z-index:2;transform:translateY(10px);transition:transform .6s ease}
+  .slide.active .txt{transform:translateY(0)}
   .slide h2{font-size:clamp(24px,6vw,40px);line-height:1.05;font-weight:900;text-transform:uppercase}
   .slide h2 span{color:var(--gold)}
   .slide p{color:#cdd6f5;margin-top:6px;font-size:14px}
@@ -357,12 +358,25 @@ slides.forEach((_, i) => {
   b.onclick = () => goSlide(i);
   dotsBox.appendChild(b);
 });
+let slideTimer;
+function startSlideTimer(){ clearInterval(slideTimer); slideTimer = setInterval(() => goSlide((slideIdx + 1) % slides.length), 5000); }
 function goSlide(i){
   slideIdx = i;
   slides.forEach((s, j) => s.classList.toggle("active", j === i));
   dotsBox.querySelectorAll("button").forEach((b, j) => b.classList.toggle("active", j === i));
+  startSlideTimer();
 }
-setInterval(() => goSlide((slideIdx + 1) % slides.length), 5000);
+startSlideTimer();
+/* Swipe banner */
+const car = document.getElementById("carousel");
+let touchX = null;
+car.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; }, {passive:true});
+car.addEventListener("touchend", e => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 40) goSlide((slideIdx + (dx < 0 ? 1 : slides.length - 1)) % slides.length);
+  touchX = null;
+}, {passive:true});
 
 function stockFor(pid, dur){ return (STOCK[`${pid}|${dur}`] || 0); }
 function stockTotal(pid){
