@@ -267,7 +267,10 @@
       <button class="cta-pay" id="copy-key" style="flex:none;padding:12px 16px">SALIN</button>
     </div>
   </div>
-  <button class="cta-pay" id="paid-btn">SAYA SUDAH BAYAR</button>
+  <div class="box" id="pending-note" style="text-align:center">
+    <p style="color:var(--mut);font-size:14px;line-height:1.7">Menunggu pembayaran…<br>Key lisensi akan muncul otomatis di halaman ini begitu pembayaran terdeteksi.</p>
+  </div>
+  <a class="cta-pay" id="wa-fallback" style="display:none;text-decoration:none;text-align:center" target="_blank" href="#">KEY BELUM MUNCUL? HUBUNGI ADMIN</a>
   <div class="paylinks">
     <a href="#" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/></svg> KEMBALI KE BERANDA</a>
     <a href="#" onclick="location.reload();return false">REFRESH HALAMAN <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></a>
@@ -440,9 +443,9 @@ function createOrder(){
   document.getElementById("inv-product").textContent = currentProduct.name;
   document.getElementById("inv-dur").textContent = selectedDur;
   document.getElementById("inv-total").textContent = fmt(selectedPrice);
-  const pb0 = document.getElementById("paid-btn");
-  pb0.style.display = "";
-  pb0.textContent = "SAYA SUDAH BAYAR";
+  document.getElementById("pending-note").style.display = "";
+  document.getElementById("wa-fallback").style.display = "none";
+  document.getElementById("wa-fallback").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(`Halo JAVASTORE, saya sudah bayar tapi key belum muncul.\nInvoice: ${inv}\nNama: ${name}\nProduk: ${currentProduct.name} - ${selectedDur}\nTotal: ${fmt(selectedPrice)}\nMohon bantuannya ya.`);
   document.getElementById("keybox").style.display = "none";
   document.getElementById("keycode").textContent = "";
   document.getElementById("copy-key").onclick = () => {
@@ -452,10 +455,6 @@ function createOrder(){
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(k).then(done).catch(() => { prompt("Salin key kamu:", k); });
     } else { prompt("Salin key kamu:", k); }
-  };
-  document.getElementById("paid-btn").onclick = () => {
-    const text = `Halo JAVASTORE, saya sudah bayar.\nInvoice: ${inv}\nNama: ${name}\nProduk: ${currentProduct.name} - ${selectedDur}\nTotal: ${fmt(selectedPrice)}${window.__txId ? "\nTransaksi: " + window.__txId : ""}\nMohon konfirmasi ya.`;
-    window.open("https://wa.me/" + WA + "?text=" + encodeURIComponent(text), "_blank");
   };
   closeModal();
   document.getElementById("home").classList.add("hidden");
@@ -495,9 +494,6 @@ async function initDynamicQR(inv, amount, name, wa){
     qr.make();
     document.getElementById("qrframe").innerHTML = qr.createImgTag(5, 8);
     if (data.totalAmount) document.getElementById("inv-total").textContent = fmt(data.totalAmount);
-    // Kalau ada stok key untuk produk+durasi ini, sembunyikan tombol konfirmasi:
-    // key akan muncul otomatis begitu lunas.
-    if (data.hasStock) document.getElementById("paid-btn").style.display = "none";
     // Poll status tiap 5 detik sampai lunas / expired / batal
     pollInt = setInterval(async () => {
       try {
@@ -532,15 +528,17 @@ async function initDynamicQR(inv, amount, name, wa){
           if (kd.license_code) {
             document.getElementById("keycode").textContent = kd.license_code;
             document.getElementById("keybox").style.display = "";
-            document.getElementById("paid-btn").style.display = "none";
+            document.getElementById("pending-note").style.display = "none";
           } else {
-            document.getElementById("paid-btn").style.display = "";
-            document.getElementById("paid-btn").textContent = "KONFIRMASI VIA WHATSAPP";
+            // Lunas tapi tidak ada key (stok habis / produk belum ada stok):
+            // tampilkan link hubungi admin.
+            document.getElementById("pending-note").style.display = "none";
+            document.getElementById("wa-fallback").style.display = "";
           }
         } else if (dd.status === "expired" || dd.status === "cancel") {
           clearInterval(pollInt); pollInt = null;
           document.getElementById("pay-status").textContent = "PEMBAYARAN " + (dd.status === "expired" ? "KEDALUWARSA" : "DIBATALKAN");
-          document.getElementById("paid-btn").style.display = "";
+          document.getElementById("pending-note").style.display = "none";
         }
       } catch (_) { /* polling gagal sekali: coba lagi di interval berikut */ }
     }, 5000);
