@@ -71,7 +71,7 @@
   .card:hover{transform:translateY(-3px);border-color:var(--blue)}
   .thumb{aspect-ratio:1/1;overflow:hidden;background:#000;position:relative}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .plat{position:absolute;top:8px;left:8px;background:rgba(4,8,26,.85);border:1px solid var(--line);font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:999px}
+  .plat{position:absolute;top:8px;left:8px;background:rgba(4,8,26,.55);border:1px solid var(--line);font-size:10px;font-weight:600;letter-spacing:.5px;padding:4px 8px;border-radius:999px}
   .thumb.ph-white{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#111}
   .thumb.ph-white .big{font-size:22px;font-weight:900;text-align:center;line-height:1.1}
   .thumb.ph-white .sub{font-size:11px;letter-spacing:3px;color:#666}
@@ -395,7 +395,7 @@ function cardHTML(p){
   const bestBadge = (p.bestseller && !p.maintenance) ? '<span class="best-badge">TERLARIS</span>' : '';
   const thumb = p.img
     ? `<div class="thumb"><img src="${p.img}" alt="${p.name}" loading="lazy"><span class="plat">${p.platLabel}</span>${badge}${bestBadge}</div>`
-    : `<div class="thumb ph-white"><span class="plat" style="color:#fff;background:#111">${p.platLabel}</span>${badge}${bestBadge}<div class="big">CH3AT<br>GPT</div><div class="sub">ROOT</div></div>`;
+    : `<div class="thumb ph-white"><span class="plat" style="color:#fff;background:rgba(17,17,17,.55)">${p.platLabel}</span>${badge}${bestBadge}<div class="big">CH3AT<br>GPT</div><div class="sub">ROOT</div></div>`;
   const buyBtn = p.maintenance
     ? '<span class="buy maint">Maintenance</span>'
     : `<span class="buy"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21.5 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg> Beli</span>`;
