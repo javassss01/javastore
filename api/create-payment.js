@@ -54,6 +54,24 @@ function rateLimited(req) {
   return list.length > RATE_LIMIT.max;
 }
 
+// Supabase (opsional — kalau env var belum diisi, toko tetap jalan manual).
+// Dipakai untuk mencatat order + mengecek stok key. Server-side saja.
+async function sbCall(path, method, body) {
+  const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      Prefer: "return=representation",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(JSON.stringify(data).slice(0, 200));
+  return data;
+}
+
 module.exports = async (req, res) => {
   cors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
@@ -109,6 +127,19 @@ module.exports = async (req, res) => {
       return res.status(502).json({ error: "Respons Casaku tidak lengkap", detail: data });
     }
 
+    // Stok: catat order + cek apakah ada key tersedia untuk produk+durasi ini.
+    // Gagal ke Supabase tidak boleh menggagalkan pembayaran — fallback ke manual.
+    let hasStock = false;
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        await sbCall("orders", "POST", { invoice, transaction_id: transactionId, product, duration, amount: totalAmount, name, wa, status: "pending" });
+      } catch (e) { console.warn("Supabase order insert gagal:", String(e).slice(0, 120)); }
+      try {
+        const stock = await sbCall(`licenses?product=eq.${encodeURIComponent(product)}&duration=eq.${encodeURIComponent(duration)}&status=eq.AVAILABLE&select=id&limit=1`, "GET");
+        hasStock = Array.isArray(stock) && stock.length > 0;
+      } catch (e) { console.warn("Supabase stock check gagal:", String(e).slice(0, 120)); }
+    }
+
     return res.status(200).json({
       transactionId,
       qr_string: qrString,
@@ -116,6 +147,7 @@ module.exports = async (req, res) => {
       invoice,
       product,
       duration,
+      hasStock,
       expiresAt: d.expiredAt || d.expired_at || null,
     });
   } catch (e) {

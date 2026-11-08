@@ -259,6 +259,14 @@
       <p style="color:var(--mut);font-size:13px;margin-top:10px;line-height:1.6"><b style="color:#fff">QRIS All Payment</b><br>Scan QR di atas menggunakan aplikasi m-banking atau e-wallet pilihan Anda.<br><span style="font-size:12px">Nama merchant yang muncul: <b style="color:#fff">JADESTELAMOUR</b> — itu QRIS resmi JAVASTORE.</span></p>
     </div>
   </div>
+  <div class="box" id="keybox" style="display:none">
+    <h3>LICENSE KEY ANDA</h3>
+    <p style="color:var(--mut);font-size:13px;line-height:1.6">Pembayaran diterima! Ini key lisensi kamu — simpan baik-baik, key hanya tampil di halaman ini.</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+      <code id="keycode" style="flex:1;font-size:15px;letter-spacing:1px;background:#04081a;border:1px solid #1e63e8;border-radius:10px;padding:12px;word-break:break-all"></code>
+      <button class="cta-pay" id="copy-key" style="flex:none;padding:12px 16px">SALIN</button>
+    </div>
+  </div>
   <button class="cta-pay" id="paid-btn">SAYA SUDAH BAYAR</button>
   <div class="paylinks">
     <a href="#" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/></svg> KEMBALI KE BERANDA</a>
@@ -432,6 +440,19 @@ function createOrder(){
   document.getElementById("inv-product").textContent = currentProduct.name;
   document.getElementById("inv-dur").textContent = selectedDur;
   document.getElementById("inv-total").textContent = fmt(selectedPrice);
+  const pb0 = document.getElementById("paid-btn");
+  pb0.style.display = "";
+  pb0.textContent = "SAYA SUDAH BAYAR";
+  document.getElementById("keybox").style.display = "none";
+  document.getElementById("keycode").textContent = "";
+  document.getElementById("copy-key").onclick = () => {
+    const k = document.getElementById("keycode").textContent;
+    if (!k) return;
+    const done = () => { document.getElementById("copy-key").textContent = "DISALIN"; setTimeout(() => document.getElementById("copy-key").textContent = "SALIN", 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(k).then(done).catch(() => { prompt("Salin key kamu:", k); });
+    } else { prompt("Salin key kamu:", k); }
+  };
   document.getElementById("paid-btn").onclick = () => {
     const text = `Halo JAVASTORE, saya sudah bayar.\nInvoice: ${inv}\nNama: ${name}\nProduk: ${currentProduct.name} - ${selectedDur}\nTotal: ${fmt(selectedPrice)}${window.__txId ? "\nTransaksi: " + window.__txId : ""}\nMohon konfirmasi ya.`;
     window.open("https://wa.me/" + WA + "?text=" + encodeURIComponent(text), "_blank");
@@ -474,6 +495,9 @@ async function initDynamicQR(inv, amount, name, wa){
     qr.make();
     document.getElementById("qrframe").innerHTML = qr.createImgTag(5, 8);
     if (data.totalAmount) document.getElementById("inv-total").textContent = fmt(data.totalAmount);
+    // Kalau ada stok key untuk produk+durasi ini, sembunyikan tombol konfirmasi:
+    // key akan muncul otomatis begitu lunas.
+    if (data.hasStock) document.getElementById("paid-btn").style.display = "none";
     // Poll status tiap 5 detik sampai lunas / expired / batal
     pollInt = setInterval(async () => {
       try {
@@ -490,10 +514,33 @@ async function initDynamicQR(inv, amount, name, wa){
           st.textContent = "LUNAS — PEMBAYARAN DITERIMA";
           st.style.color = "#4ade80";
           document.getElementById("countdown").textContent = "LUNAS";
-          document.getElementById("paid-btn").textContent = "KONFIRMASI VIA WHATSAPP";
+          // Ambil key otomatis (coba beberapa kali — webhook butuh sedetik untuk klaim key).
+          // Kalau tidak ada key, tampilkan lagi tombol konfirmasi manual via WA.
+          let kd = {};
+          for (let attempt = 0; attempt < 4; attempt++) {
+            try {
+              const kr = await fetch(BACKEND_URL + "/api/get-key", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transactionId: data.transactionId }),
+              });
+              kd = await kr.json().catch(() => ({}));
+              if (kd.license_code) break;
+            } catch (_) { /* coba lagi */ }
+            await new Promise(r => setTimeout(r, 2000));
+          }
+          if (kd.license_code) {
+            document.getElementById("keycode").textContent = kd.license_code;
+            document.getElementById("keybox").style.display = "";
+            document.getElementById("paid-btn").style.display = "none";
+          } else {
+            document.getElementById("paid-btn").style.display = "";
+            document.getElementById("paid-btn").textContent = "KONFIRMASI VIA WHATSAPP";
+          }
         } else if (dd.status === "expired" || dd.status === "cancel") {
           clearInterval(pollInt); pollInt = null;
           document.getElementById("pay-status").textContent = "PEMBAYARAN " + (dd.status === "expired" ? "KEDALUWARSA" : "DIBATALKAN");
+          document.getElementById("paid-btn").style.display = "";
         }
       } catch (_) { /* polling gagal sekali: coba lagi di interval berikut */ }
     }, 5000);

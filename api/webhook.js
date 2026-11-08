@@ -1,9 +1,9 @@
 // JAVASTORE backend — penerima webhook Casaku (notifikasi saat transaksi lunas)
 // Env: CASAKU_WEBHOOK_SECRET (diisi di dashboard Vercel)
 // Casaku mengirim POST dengan header X-Casaku-Signature = HMAC-SHA256(raw body, secret).
-// Untuk sekarang endpoint ini hanya verifikasi signature dan mencatat pembayaran lunas.
-// Nanti kalau stok key sudah ada + database order sudah dipasang, di sinilah
-// order diubah jadi PAID dan key otomatis dikirim ke pembeli.
+// Saat paid: verifikasi signature, lalu klaim 1 key stok dari Supabase untuk
+// transaksi itu (claim_license_for_transaction). Pembeli mengambil key-nya
+// lewat api/get-key.js. Kalau stok habis, order tetap lunas dan admin kirim manual.
 const crypto = require("crypto");
 
 function readRaw(req) {
@@ -13,6 +13,22 @@ function readRaw(req) {
     req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
+}
+
+// Supabase (opsional — kalau env var belum diisi, webhook tetap balas 200).
+async function sbRpc(fn, args) {
+  const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+    },
+    body: JSON.stringify(args),
+  });
+  const data = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(JSON.stringify(data).slice(0, 200));
+  return data;
 }
 
 module.exports = async (req, res) => {
@@ -38,8 +54,18 @@ module.exports = async (req, res) => {
 
     const payload = JSON.parse(raw.toString("utf8"));
     if (payload.status === "paid") {
-      // TODO (nanti): update order jadi PAID di database + kirim key otomatis.
       console.log("PAID:", payload.transactionId, "amount:", payload.amount, "paidAt:", payload.paidAt);
+      // Klaim 1 key stok untuk transaksi ini (atomik, idempotent).
+      // Kalau Supabase belum dikonfigurasi / stok habis, order tetap tercatat
+      // lunas di log dan admin mengirim key manual.
+      if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && payload.transactionId) {
+        try {
+          const code = await sbRpc("claim_license_for_transaction", { p_transaction_id: payload.transactionId });
+          console.log("KEY CLAIMED:", payload.transactionId, "->", code || "(stok habis / order tidak ditemukan)");
+        } catch (e) {
+          console.warn("Klaim key gagal:", String(e).slice(0, 200));
+        }
+      }
     }
 
     // Balas 200 secepatnya (Casaku retry kalau >10 detik tanpa 2xx).
