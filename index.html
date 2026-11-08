@@ -80,6 +80,8 @@
   @media(min-width:900px){.cbody h3{font-size:17px}}
   .cbody .from{color:var(--mut);font-size:11px;margin-top:4px}
   .cbody .pr{font-weight:900;font-size:15px}
+  .cbody .stock{color:#4ade80;font-size:12px;font-weight:800;margin-top:3px}
+  .dur em.st{display:block;color:#4ade80;font-style:normal;font-size:11px;font-weight:800}
   @media(min-width:900px){.cbody .pr{font-size:17px}}
   .buy{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;background:linear-gradient(180deg,#4a90ff,#1e63e8);color:#fff;font-weight:800;padding:10px;border-radius:11px;font-size:14px}
   .maint-badge{position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:999px}
@@ -350,6 +352,32 @@ function goSlide(i){
 }
 setInterval(() => goSlide((slideIdx + 1) % slides.length), 5000);
 
+function stockFor(pid, dur){ return (STOCK[`${pid}|${dur}`] || 0); }
+function stockTotal(pid){
+  const p = PRODUCTS.find(x => x.id === pid);
+  if (!p) return 0;
+  return p.prices.reduce((n, [d]) => n + stockFor(pid, d), 0);
+}
+// Stok live dari database — diambil dari backend, di-refresh saat halaman
+// dibuka dan saat modal checkout dibuka. Hanya durasi/produk yang punya
+// key di database yang menampilkan angka; produk tanpa stok di database
+// tetap bisa dibeli (diproses manual), jadi tidak ditandai HABIS.
+let STOCK = {};
+async function loadStock(){
+  if (!BACKEND_URL) return;
+  try {
+    const r = await fetch(BACKEND_URL + "/api/stock");
+    const d = await r.json().catch(() => ({}));
+    STOCK = d.stock || {};
+    render();
+    paintModalStock();
+  } catch (_) { /* stok gagal dimuat: kartu tetap tampil tanpa angka stok */ }
+}
+function paintModalStock(){
+  const box = document.querySelector("#sheet .durs");
+  if (!box || !currentProduct) return;
+  box.innerHTML = currentProduct.prices.map(([d, pr]) => `<button class="dur${d===selectedDur?' active':''}" onclick="pickDur(this,'${d}',${pr})"><b>${d}</b><span>${fmt(pr)}</span>${stockFor(currentProduct.id, d) > 0 ? `<em class="st">Stok: ${stockFor(currentProduct.id, d)}</em>` : ""}</button>`).join("");
+}
 function cardHTML(p){
   const badge = p.maintenance ? '<span class="maint-badge">MAINTENANCE</span>' : '';
   const thumb = p.img
@@ -358,12 +386,15 @@ function cardHTML(p){
   const buyBtn = p.maintenance
     ? '<span class="buy maint">Maintenance</span>'
     : `<span class="buy"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21.5 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg> Beli</span>`;
+  const st = stockTotal(p.id);
+  const stockLine = st > 0 ? `<div class="stock">STOK: ${st} • INSTAN</div>` : "";
   return `<article class="card${p.maintenance ? " maint" : ""}" onclick="openCheckout('${p.id}')">
     ${thumb}
     <div class="cbody">
       <h3>${p.name}</h3>
       <div class="from">MULAI DARI</div>
       <div class="pr">${fmt(p.start)}</div>
+      ${stockLine}
       ${buyBtn}
     </div>
   </article>`;
@@ -401,7 +432,7 @@ function openCheckout(id){
     <h2>${p.name}</h2>
     <p class="desc">${p.desc}</p>
     <label>Pilih Durasi</label>
-    <div class="durs">${p.prices.map(([d, pr], i) => `<button class="dur${i===0?' active':''}" onclick="pickDur(this,'${d}',${pr})"><b>${d}</b><span>${fmt(pr)}</span></button>`).join("")}</div>
+    <div class="durs">${p.prices.map(([d, pr], i) => `<button class="dur${i===0?' active':''}" onclick="pickDur(this,'${d}',${pr})"><b>${d}</b><span>${fmt(pr)}</span>${stockFor(p.id, d) > 0 ? `<em class="st">Stok: ${stockFor(p.id, d)}</em>` : ""}</button>`).join("")}</div>
     <label>Nama User</label>
     <input id="ord-name" placeholder="Contoh: Javas" autocomplete="name">
     <label>Nomor WhatsApp</label>
@@ -411,6 +442,7 @@ function openCheckout(id){
     <button class="ghost" onclick="closeModal()">Batal</button>`;
   document.getElementById("modal").classList.add("open");
   document.body.style.overflow = "hidden";
+  loadStock();
 }
 function pickDur(btn, d, pr){
   selectedDur = d; selectedPrice = pr;
@@ -617,6 +649,7 @@ function showHome(){
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 render();
+loadStock();
 restoreOrder();
 </script>
 </body>
