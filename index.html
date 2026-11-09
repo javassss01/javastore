@@ -273,6 +273,7 @@
       </div>
       <span class="qris-on">QRIS AKTIF</span>
       <p style="color:var(--mut);font-size:13px;margin-top:10px;line-height:1.6"><b style="color:#fff">QRIS All Payment</b><br>Scan QR di atas menggunakan aplikasi m-banking atau e-wallet pilihan Anda.<br><span style="font-size:12px">Nama merchant yang muncul: <b style="color:#fff">JADESTELAMOUR</b> — itu QRIS resmi JAVASTORE.</span></p>
+      <p style="color:#ffb020;font-size:13px;margin-top:10px;line-height:1.6"><b>PERHATIAN:</b> Bayar QR di halaman ini saja, dengan nominal yang tampil (ada kode uniknya). Jangan transfer manual ke DANA — transfer manual tidak terdeteksi sistem, key tidak akan muncul otomatis.</p>
     </div>
   </div>
   <div class="box" id="keybox" style="display:none">
@@ -320,10 +321,10 @@ const BACKEND_URL = "https://javastore-two.vercel.app";
    kartu produk menampilkan badge MAINTENANCE, tombol Beli nonaktif,
    dan pembeli tidak bisa checkout. Ubah lagi ke false kalau sudah normal. */
 const PRODUCTS = [
-  {id:"xreg", name:"X REG", maintenance:false, platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/xreg.jpg", start:5000, popular:true, bestseller:true,
+  {id:"xreg", name:"X REG", maintenance:true, platforms:["android","ios"], platLabel:"ANDROID + IOS", img:"images/xreg.jpg", start:5000, popular:true, bestseller:true,
    desc:"X REG — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
    prices:[["1 JAM",5000],["3 JAM",8000],["6 JAM",12000],["12 JAM",15000],["1 HARI",20000],["3 HARI",40000],["7 HARI",70000],["30 HARI",130000]]},
-  {id:"phantom", name:"PHANTOM", maintenance:false, platforms:["android","ios","pc"], platLabel:"ANDROID + IOS + PC", img:"images/phantom.jpg", start:4000, popular:true,
+  {id:"phantom", name:"PHANTOM", maintenance:true, platforms:["android","ios","pc"], platLabel:"ANDROID + IOS + PC", img:"images/phantom.jpg", start:4000, popular:true,
    desc:"PHANTOM Free Fire — lisensi per durasi. Pilih durasi, isi nama & WhatsApp, lalu bayar QRIS.",
    prices:[["1 JAM",4000],["3 JAM",6000],["6 JAM",10000],["12 JAM",12000],["1 HARI",18000],["3 HARI",25000],["7 HARI",40000],["30 HARI",80000]]},
   {id:"ch3atgpt", name:"CH3AT GPT ROOT", maintenance:false, platforms:["android","root"], platLabel:"ANDROID + ROOT", img:"", start:14000, popular:true,

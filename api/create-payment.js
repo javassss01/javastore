@@ -18,7 +18,7 @@ const CASAKU_API = "https://api.casaku.id";
 // MAINTENANCE: isi id produk yang lagi maintenance, misal new Set(["xreg"]) —
 // request untuk produk itu ditolak supaya tidak bisa beli lewat API langsung.
 // Samakan dengan maintenance:true di index.html.
-const MAINTENANCE = new Set([]);
+const MAINTENANCE = new Set(["xreg", "phantom"]);
 
 const ALLOWED_ORIGINS = ["https://javassss01.github.io", "https://javascheat.my.id", "https://www.javascheat.my.id"];
 
