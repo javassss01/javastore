@@ -556,7 +556,7 @@ function startCountdown(){
 }
 function clearStoredOrder(){ try { localStorage.removeItem("javastore_order"); } catch (_) {} }
 // Poll status tiap 5 detik sampai lunas / expired / batal.
-function startPolling(transactionId){
+function startPolling(transactionId, wa){
   if (pollInt) { clearInterval(pollInt); pollInt = null; }
   pollInt = setInterval(async () => {
     try {
@@ -581,7 +581,7 @@ function startPolling(transactionId){
             const kr = await fetch(BACKEND_URL + "/api/get-key", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ transactionId }),
+              body: JSON.stringify({ transactionId, wa }),
             });
             kd = await kr.json().catch(() => ({}));
             if (kd.license_code) break;
@@ -633,7 +633,7 @@ function restoreOrder(){
   document.getElementById("paypage").classList.add("show");
   window.scrollTo(0, 0);
   startCountdown();
-  startPolling(o.transactionId);
+  startPolling(o.transactionId, o.wa);
 }
 async function initDynamicQR(inv, amount, name, wa){
   if (pollInt) { clearInterval(pollInt); pollInt = null; }
@@ -662,7 +662,7 @@ async function initDynamicQR(inv, amount, name, wa){
         expiresAt: new Date(window.__deadline).toISOString(),
       }));
     } catch (_) {}
-    startPolling(data.transactionId);
+    startPolling(data.transactionId, wa);
   } catch (e) {
     console.warn("QRIS dinamis gagal, pakai QRIS statis:", e);
   }
