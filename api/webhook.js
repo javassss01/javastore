@@ -36,7 +36,13 @@ module.exports = async (req, res) => {
 
   try {
     const raw = await readRaw(req);
-    const signature = req.headers["x-casaku-signature"] || "";
+    let signature = req.headers["x-casaku-signature"] || "";
+    // Casaku mengirim signature sebagai "hmac-sha256=<hex>" (lihat PAYLOAD
+    // PREVIEW di halaman Webhook Developer) — buang prefix algoritmanya
+    // sebelum dibandingkan, supaya cocok dengan HMAC yang kita hitung.
+    const eq = signature.indexOf("=");
+    if (eq !== -1) signature = signature.slice(eq + 1);
+    signature = signature.trim();
     const secret = process.env.CASAKU_WEBHOOK_SECRET || "";
 
     if (!secret) return res.status(500).json({ error: "Webhook belum dikonfigurasi" });
