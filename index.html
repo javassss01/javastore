@@ -179,6 +179,21 @@
   .key-label{display:block;font-size:11px;font-weight:800;letter-spacing:3px;color:var(--mut);margin-bottom:10px}
   .key-card code{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:19px;font-weight:700;letter-spacing:2px;color:#7dffb0;word-break:break-all;line-height:1.5}
   .key-copy{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+  /* Cek Pesanan */
+  .check-result{margin-top:14px}
+  .check-result .stat{font-size:15px;font-weight:900;letter-spacing:.5px;margin-bottom:6px}
+  .check-result .stat.ok{color:#4ade80}
+  .check-result .stat.wait{color:var(--gold)}
+  .check-result .stat.bad{color:#f87171}
+  .check-key{margin-top:12px;border:1.5px dashed #22c55e;background:#04081a;border-radius:14px;padding:14px 12px;text-align:center}
+  .check-key code{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:17px;font-weight:700;letter-spacing:1px;color:#7dffb0;word-break:break-all;line-height:1.5}
+  /* Toast "baru dibeli" — hanya dari order PAID asli, tidak pernah palsu */
+  .recent-toast{position:fixed;left:14px;bottom:16px;z-index:55;display:flex;align-items:center;gap:10px;background:#0b1230;border:1px solid #14532d;border-radius:14px;padding:11px 14px;box-shadow:0 8px 28px rgba(0,0,0,.5);max-width:min(320px,calc(100vw - 100px));opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s;pointer-events:none}
+  .recent-toast.show{opacity:1;transform:translateY(0)}
+  .recent-toast .rt-ic{width:34px;height:34px;flex:none;border-radius:50%;background:var(--green);color:#04140a;display:flex;align-items:center;justify-content:center}
+  .recent-toast .rt-ic svg{width:19px;height:19px}
+  .recent-toast b{display:block;font-size:13px}
+  .recent-toast span{font-size:12px;color:var(--mut)}
   .hidden{display:none!important}
 </style>
 </head>
@@ -201,6 +216,7 @@
     <a href="#" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/></svg> Beranda</a>
     <a href="#produk" onclick="showHome();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21.5 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg> Produk</a>
     <a href="#cara" onclick="goCara();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 19.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H19"/></svg> Cara Beli</a>
+    <a href="#" onclick="openCheckOrder();return false"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Cek Pesanan</a>
     <a href="https://whatsapp.com/channel/0029VbCN0ewEgGfUxvcwar3I" target="_blank" rel="noopener"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg> Informasi</a>
     <a href="https://wa.me/6281912733875?text=Halo%20JAVASTORE%2C%20saya%20mau%20tanya-tanya%20dulu." target="_blank" rel="noopener"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l2-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg> Hubungi Admin (WhatsApp)</a>
   </div></div>
@@ -316,7 +332,7 @@
     <p style="margin-top:8px">JAVASTORE adalah platform top-up game terpercaya dan termurah. Dapatkan harga terbaik dan proses instan 24 jam.</p>
     <div class="footcols">
       <div><h4>LAYANAN</h4><a href="#produk" onclick="showHome();return false">Top Up Game</a><a href="#produk" onclick="showHome();return false">Beli Voucher</a><a href="#produk" onclick="showHome();return false">VIP Mods</a></div>
-      <div><h4>DUKUNGAN</h4><a href="#cara" onclick="goCara();return false">Cara Beli</a><a href="https://wa.me/6281912733875" target="_blank" rel="noopener">Hubungi Kami</a><a href="https://whatsapp.com/channel/0029VbCN0ewEgGfUxvcwar3I" target="_blank" rel="noopener">Saluran WhatsApp</a><a href="#" onclick="showHome();return false">FAQ</a></div>
+      <div><h4>DUKUNGAN</h4><a href="#cara" onclick="goCara();return false">Cara Beli</a><a href="#" onclick="openCheckOrder();return false">Cek Pesanan</a><a href="https://wa.me/6281912733875" target="_blank" rel="noopener">Hubungi Kami</a><a href="https://whatsapp.com/channel/0029VbCN0ewEgGfUxvcwar3I" target="_blank" rel="noopener">Saluran WhatsApp</a><a href="#" onclick="showHome();return false">FAQ</a></div>
     </div>
     <p style="margin-top:16px">WhatsApp: <b>0819-1273-3875</b> • Order hanya via website ini.<br>Penggunaan produk mengikuti aturan game masing-masing. Harga dapat berubah sewaktu-waktu.</p>
   </div>
@@ -698,11 +714,113 @@ function showHome(){
   if (pollInt) { clearInterval(pollInt); pollInt = null; }
   window.scrollTo(0, 0);
 }
+/* --- Cek Pesanan: cari order pakai nomor invoice + WA --- */
+function openCheckOrder(){
+  document.getElementById("menu").classList.remove("open");
+  document.getElementById("sheet").innerHTML = `
+    <h2>CEK PESANAN</h2>
+    <p class="desc">Masukkan nomor invoice dan nomor WhatsApp yang dipakai saat checkout untuk melihat status pesanan dan key lisensi kamu.</p>
+    <label>Nomor Invoice</label>
+    <input id="co-inv" placeholder="Contoh: INV-JVS-20261110-ICJ3J" autocomplete="off" style="text-transform:uppercase">
+    <label>Nomor WhatsApp</label>
+    <input id="co-wa" placeholder="Contoh: 081912733875" inputmode="tel" autocomplete="tel">
+    <div id="co-err" class="err">Pesanan tidak ditemukan atau nomor WhatsApp tidak cocok.</div>
+    <div id="co-result"></div>
+    <button class="primary" onclick="checkOrder()">CEK PESANAN</button>
+    <button class="ghost" onclick="closeModal()">Tutup</button>`;
+  document.getElementById("modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+async function checkOrder(){
+  const inv = (document.getElementById("co-inv").value || "").trim().toUpperCase();
+  const wa = (document.getElementById("co-wa").value || "").trim();
+  const err = document.getElementById("co-err");
+  const res = document.getElementById("co-result");
+  err.classList.remove("show");
+  if (!inv || !wa) { err.textContent = "Isi nomor invoice dan WhatsApp dulu ya."; err.classList.add("show"); return; }
+  res.innerHTML = `<p class="desc" style="margin-top:12px">Mengecek pesanan…</p>`;
+  try {
+    const r = await fetch(BACKEND_URL + "/api/check-order", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({invoice: inv, wa})});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "gagal");
+    const p = PRODUCTS.find(x => x.id === d.product);
+    const pname = p ? p.name : (d.product || "").toUpperCase();
+    const paidAt = d.paidAt ? new Date(d.paidAt) : null;
+    let statHtml = "";
+    if (d.status === "paid") statHtml = `<div class="stat ok">LUNAS — PEMBAYARAN DITERIMA</div>`;
+    else if (d.status === "pending") statHtml = `<div class="stat wait">MENUNGGU PEMBAYARAN</div>`;
+    else if (d.status === "expired") statHtml = `<div class="stat bad">PEMBAYARAN KEDALUWARSA</div>`;
+    else statHtml = `<div class="stat bad">DIBATALKAN</div>`;
+    let extra = "";
+    if (d.status === "paid" && d.license_code) {
+      extra = `<div class="check-key"><span class="key-label">LICENSE KEY</span><code id="co-key">${d.license_code}</code><button class="cta-pay key-copy" style="margin-top:12px" onclick="copyCheckKey()"><svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span id="co-copy-label">SALIN KEY</span></button></div>`;
+    } else if (d.status === "paid") {
+      extra = `<p class="desc" style="margin-top:12px">Pembayaran sudah diterima, tapi key belum tersedia di sistem. Hubungi admin via WhatsApp ya.</p><a class="cta-pay" style="display:block;text-decoration:none;text-align:center" target="_blank" href="https://wa.me/${WA}?text=${encodeURIComponent("Halo JAVASTORE, saya sudah bayar tapi key belum muncul.\nInvoice: " + d.invoice + "\nProduk: " + pname + " - " + d.duration)}">HUBUNGI ADMIN</a>`;
+    } else if (d.status === "pending") {
+      extra = `<p class="desc" style="margin-top:12px">Selesaikan pembayaran di halaman pembayaran kamu. Kalau halamannya tertutup, buka lagi website ini di browser yang sama — halaman pembayaran akan muncul lagi.</p>`;
+    }
+    res.innerHTML = `<div class="check-result">${statHtml}
+      <div class="row"><span class="k">PRODUK</span><span class="v">${pname}</span></div>
+      <div class="row"><span class="k">DURASI</span><span class="v">${d.duration}</span></div>
+      <div class="row total"><span class="k">TOTAL</span><span class="v">${fmt(d.amount)}</span></div>
+      ${paidAt ? `<div class="row"><span class="k">DIBAYAR</span><span class="v">${paidAt.toLocaleString("id-ID")}</span></div>` : ""}
+      ${extra}</div>`;
+  } catch (_) {
+    res.innerHTML = "";
+    err.textContent = "Pesanan tidak ditemukan atau nomor WhatsApp tidak cocok.";
+    err.classList.add("show");
+  }
+}
+function copyCheckKey(){
+  const k = (document.getElementById("co-key") || {}).textContent || "";
+  if (!k) return;
+  const done = () => { const l = document.getElementById("co-copy-label"); if (l) l.textContent = "✓ DISALIN"; setTimeout(() => { const l2 = document.getElementById("co-copy-label"); if (l2) l2.textContent = "SALIN KEY"; }, 2000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(k).then(done).catch(() => prompt("Salin key kamu:", k));
+  else prompt("Salin key kamu:", k);
+}
+/* --- Notifikasi "baru dibeli": hanya dari order PAID asli 7 hari terakhir.
+   Kalau tidak ada order baru, toast tidak tampil — tidak ada data palsu. --- */
+let recentOrders = [], recentIdx = 0;
+function timeAgo(ts){
+  const s = Math.max(0, Math.floor((Date.now() - new Date(ts).getTime()) / 1000));
+  if (s < 300) return "baru saja";
+  if (s < 3600) return Math.floor(s / 60) + " menit lalu";
+  if (s < 86400) return Math.floor(s / 3600) + " jam lalu";
+  if (s < 172800) return "kemarin";
+  return Math.floor(s / 86400) + " hari lalu";
+}
+async function loadRecentOrders(){
+  if (!BACKEND_URL) return;
+  try {
+    const r = await fetch(BACKEND_URL + "/api/recent-orders");
+    const d = await r.json().catch(() => ({}));
+    recentOrders = Array.isArray(d.orders) ? d.orders : [];
+    if (!recentOrders.length) return;
+    showRecentToast();
+    setInterval(showRecentToast, 20000);
+  } catch (_) { /* gagal: toast tidak tampil, tidak ada data palsu */ }
+}
+function showRecentToast(){
+  if (!recentOrders.length) return;
+  if (document.getElementById("home").classList.contains("hidden")) return;
+  if (document.getElementById("modal").classList.contains("open")) return;
+  const o = recentOrders[recentIdx % recentOrders.length];
+  recentIdx++;
+  const p = PRODUCTS.find(x => x.id === o.product);
+  const pname = p ? p.name : (o.product || "").toUpperCase();
+  document.getElementById("rt-title").textContent = pname + " " + o.duration + " baru dibeli";
+  document.getElementById("rt-sub").textContent = timeAgo(o.paidAt) + " • via QRIS";
+  const t = document.getElementById("recent-toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 6000);
+}
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 render();
 loadStock();
 restoreOrder();
+loadRecentOrders();
 </script>
 <a class="wa-float" href="https://wa.me/6281912733875?text=Halo%20JAVASTORE%2C%20saya%20mau%20tanya%20dulu" target="_blank" rel="noopener" aria-label="Chat WhatsApp JAVASTORE"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+<div class="recent-toast" id="recent-toast"><span class="rt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><b id="rt-title"></b><span id="rt-sub"></span></div></div>
 </body>
 </html>
